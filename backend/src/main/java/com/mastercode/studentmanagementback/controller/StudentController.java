@@ -33,26 +33,28 @@ public class StudentController {
 
   @PostMapping
   ResponseEntity<Void> registerCustomer(@RequestBody StudentRequestModel student) {
-    studentService.addStudent(student);
+    var createdStudent = studentService.addStudent(student);
     String jwtToken = jwtUtil.issueToken(student.getEmail(), "ROLE_USER");
-    return ResponseEntity.ok()
-        .header(HttpHeaders.AUTHORIZATION, jwtToken)
-        .build();
+    var uriComponents = uriBuilder.path("/students/{id}").buildAndExpand(createdStudent.getId());
+    var location = uriComponents.toUri();
+    // return response with 201 status and location header set to URI of newly created user
+    return ResponseEntity.created(location).build();
   }
 
+  //It is not best practice to return List in ResponseEntity, return StudentResponse which includes list of students
   @GetMapping
-  ResponseEntity<List<StudentResponseModel>> getStudents() {
+  ResponseEntity<StudentResponseList> getStudents() {
     return ResponseEntity.ok(studentService.getStudents());
   }
 
   @GetMapping("/{id}")
-  ResponseEntity<StudentResponseModel> getStudentById(@PathVariable String id) {
+  ResponseEntity<StudentResponse> getStudentById(@PathVariable String id) {
     return ResponseEntity.ok(studentService.getStudentById(id));
   }
 
   @PutMapping("/{id}")
   ResponseEntity<Void> updateStudent(@PathVariable String id,
-      @RequestBody StudentRequestModel student) {
+      @RequestBody @Valid StudentRequestModel student) {
     studentService.updateStudent(id, student);
     return ResponseEntity.ok().build();
   }
@@ -60,7 +62,7 @@ public class StudentController {
   @DeleteMapping("/{id}")
   ResponseEntity<Void> deleteStudent(@PathVariable String id) {
     studentService.deleteStudentById(id);
-    return ResponseEntity.ok().build();
+    return ResponseEntity.noContent().build();
   }
 
   @PostMapping(
@@ -69,7 +71,7 @@ public class StudentController {
   )
   public void uploadCustomerProfileImage(@PathVariable("id") String id,
       @RequestParam("file") MultipartFile file) {
-    System.out.println("Test---");
+    //System.out.println("Test---");
     studentService.uploadStudentProfileImage(id, file);
   }
 
