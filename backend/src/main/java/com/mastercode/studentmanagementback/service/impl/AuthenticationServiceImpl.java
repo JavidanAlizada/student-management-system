@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     StudentMapper studentMapper = StudentMapper.INSTANCE;
